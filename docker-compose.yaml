@@ -19,7 +19,7 @@ services:
         max-file: "5"
 
   fluentd:
-    image: fluent/fluentd:latest
+    image: fluent/fluentd:v1.11-debian
     volumes:
       - ./fluentd-conf:/fluentd/etc
     ports:
