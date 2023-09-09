@@ -1,0 +1,55 @@
+version: '3.8'
+
+services:
+  nginx:
+    image: nginx:latest
+    container_name: nginx_container
+    volumes:
+      - ./nginx-conf:/etc/nginx/conf.d
+      - ./web-content:/usr/share/nginx/html
+    ports:
+      - "80:80"
+    environment:
+      - NGINX_HOST=example.com
+      - NGINX_PORT=80
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "5"
+
+  fluentd:
+    image: fluent/fluentd:latest
+    volumes:
+      - ./fluentd-conf:/fluentd/etc
+    ports:
+      - "24224:24224"
+      - "24224:24224/udp"
+
+  prometheus-fluentd-exporter:
+    image: kumina/prometheus_fluentd_exporter:latest
+    ports:
+      - "9309:9309"
+    command: -scrape_uri=http://fluentd:24224/metrics
+
+  prometheus:
+    image: prom/prometheus:latest
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+    ports:
+      - "9090:9090"
+
+  grafana:
+    image: grafana/grafana:latest
+    ports:
+      - "3000:3000"
+
+networks:
+  webnet:
+    driver: bridge
+
+volumes:
+  nginx-conf:
+  web-content:
+  fluentd-conf:
+
